@@ -1,0 +1,70 @@
+import javax.swing.table.AbstractTableModel;
+
+
+public class PalletTable extends AbstractTableModel{
+	private String[] columnNames = {"Pallet id",
+            "Product Name",
+            "Location",
+            "Date",
+            "Blocked"};
+	private Object[][] data = {
+	{"Kathy", "Smith",
+	"Snowboarding", new Integer(5), new Boolean(false)},
+	{"John", "Doe",
+	"Rowing", new Integer(3), new Boolean(true)},
+	{"Sue", "Black",
+	"Knitting", new Integer(2), new Boolean(false)},
+	{"Jane", "White",
+	"Speed reading", new Integer(20), new Boolean(true)},
+	{"Joe", "Brown",
+	"Pool", new Integer(10), new Boolean(false)}
+	};
+	
+	@Override
+	public String getColumnName(int col) {
+        return columnNames[col];
+    }
+	
+	@Override
+	public int getColumnCount() {
+		// TODO Auto-generated method stub
+		return columnNames.length;
+	}
+
+	@Override
+	public int getRowCount() {
+		// TODO Auto-generated method stub
+		return data.length;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		// TODO Auto-generated method stub
+		return data[row][col];
+	}
+	
+	@Override
+	public Class<?> getColumnClass(int col){
+		if(col==columnNames.length-1){
+			return Boolean.class;
+		}
+		return super.getColumnClass(col);
+	}
+	
+	
+	@Override
+	public boolean isCellEditable(int row, int col){
+		return col==columnNames.length-1;
+	}
+	
+	@Override
+	public void setValueAt(Object value, int row, int col){
+		if(col==columnNames.length-1){
+			data[row][col] = value;
+			fireTableCellUpdated(row,col);
+		}
+	}
+	
+
+
+}

@@ -1,0 +1,255 @@
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+
+
+public class ReciepePane extends BasicPane {
+
+	private static final long serialVersionUID = 1;
+
+	/**
+	 * The text field where the user id is entered.
+	 */
+	private JTextField[] fields;
+	private ArrayList<JLabel> labels;
+	private ArrayList<String> ingridients;
+	private ArrayList<Integer> quantities;
+	private JButton[] buttons;
+	private JPanel mainpanel;
+	/**
+	 * The number of the field where the user id is entered.
+	 */
+	private static final int PRODUCT_NAME = 0;
+	private static final int INGRIDIENT_NAME = 1;
+	private static final int QUANTITY = 2;
+	private int ingridientCount=0;
+
+	/**
+	 * The total number of fields in the fields array.
+	 */
+	private static final int NBR_FIELDS = 3;
+
+	/**
+	 * Create the login pane.
+	 * 
+	 * @param db
+	 *            The database object.
+	 */
+	public ReciepePane(Database db) {
+		super(db);
+
+	}
+
+	/**
+	 * Create the top panel, consisting of the text field.
+	 * 
+	 * @return The top panel.
+	 */
+	public JComponent createTopPanel() {
+		labels = new ArrayList<JLabel>();
+		ingridients = new ArrayList<String>();
+		quantities = new ArrayList<Integer>();
+		labels.add(new JLabel("Product name",JLabel.RIGHT));
+		labels.add(new JLabel("Ingridient",JLabel.RIGHT));
+		//  String[] texts = new String[NBR_FIELDS];
+		//  texts[PRODUCT_NAME] = "Product name";
+		//  texts[INGRIDIENT_NAME] = "Ingrident name";
+		fields = new JTextField[NBR_FIELDS];
+		fields[PRODUCT_NAME] = new JTextField(20);
+		fields[INGRIDIENT_NAME] = new JTextField(20);
+		fields[QUANTITY] = new JTextField(5);
+		//    buttons[0] = new JButton("Add");
+		// return new InputPanel(texts, fields);
+		mainpanel = new JPanel();
+		content();
+		JScrollPane scroll = new JScrollPane(mainpanel);
+		scroll.setPreferredSize(new Dimension(300,250));
+		return scroll;
+	}
+	
+	private void content(){
+
+		//mainpanel.setPreferredSize(new Dimension(400,400));
+		mainpanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx=0;
+		c.gridy=0;
+		mainpanel.add(labels.get(0),c);
+		c.gridx=1;
+		c.gridy=0;
+		mainpanel.add(fields[0],c);
+		c.gridx=0;
+		c.gridy=2;
+
+		JButton addButton = new JButton("Add ingridient");
+		addButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				try{
+					messageLabel.setText("");
+					if(fields[INGRIDIENT_NAME].getText().equals("")){
+						messageLabel.setText("Error, please enter an ingridient name");
+						return;
+					}
+					else if(ingridients.contains(fields[INGRIDIENT_NAME].getText())){
+						messageLabel.setText("Error, this ingridient is already listed");
+						return;
+					}
+					else if(!db.ingridientExists(fields[INGRIDIENT_NAME].getText())){
+						if(!confirmDialog(fields[INGRIDIENT_NAME].getText())){
+							messageLabel.setText("Error, this ingridient doesn't exist in the database!");
+							return;
+						}
+					}
+					int quantity = Integer.parseInt(fields[QUANTITY].getText());
+					quantities.add(quantity);
+					GridBagConstraints c = new GridBagConstraints();
+					c.gridx=1;
+					c.gridy=3+ingridientCount;
+					ingridients.add(fields[INGRIDIENT_NAME].getText());
+					mainpanel.add(new JLabel(fields[INGRIDIENT_NAME].getText()),c);
+					c.gridx=2;
+					c.gridy=3+ingridientCount;
+					mainpanel.add(new JLabel(fields[QUANTITY].getText().toString()),c);
+					ingridientCount++;
+					fields[INGRIDIENT_NAME].setText("");
+					fields[QUANTITY].setText("");
+					mainpanel.revalidate();
+					mainpanel.repaint();
+					System.out.println("ADD!");
+				}catch(NumberFormatException ex){
+					System.out.println("ERROR");
+					messageLabel.setText("Error, quantity must be an int");
+				}
+			}
+		});
+		mainpanel.add(addButton,c);
+		c.gridx=2;
+		c.gridy=1;
+		mainpanel.add(new JLabel("Quantity"),c);
+		c.gridx=1;
+		c.gridy=1;
+		mainpanel.add(labels.get(1),c);
+		c.gridx=1;
+		c.gridy=2;
+		mainpanel.add(fields[INGRIDIENT_NAME],c);
+		c.gridx=2;
+		c.gridy=2;
+		mainpanel.add(fields[QUANTITY],c);
+
+//		return mainpanel;
+	}
+	
+	
+	public boolean confirmDialog(String ingridient){
+		Object[] options = {"Yes", "No"};
+		int i = JOptionPane.showOptionDialog(null, "This ingridient doesn't exists in the database add it?", "Add ingridient",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+				null, options, options[0]);
+		if(i==0){
+			db.addIngridient(ingridient, 0, "", 0);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean confirmUpdateDialog(String cookieName){
+		Object[] options = {"Yes", "No"};
+		int i = JOptionPane.showOptionDialog(null, "This product already exists! Do you want to update it with current values?", "Update product",JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+				null, options, options[0]);
+		if(i==0){
+			db.updateReciepeItems(cookieName, ingridients, quantities);
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * Create the bottom panel, consisting of the login button and the message
+	 * line.
+	 * 
+	 * @return The bottom panel.
+	 */
+	public JComponent createBottomPanel() {
+		buttons = new JButton[2];
+		buttons[0] = new JButton("Save");
+		buttons[0].setActionCommand("0");
+		buttons[1] = new JButton("Cancel");
+		buttons[1].setActionCommand("1");
+		ActionHandler actHand = new ActionHandler();
+		fields[PRODUCT_NAME].addActionListener(actHand);
+		return new ButtonAndMessagePanel(buttons, messageLabel, actHand);
+	}
+
+	/**
+	 * Perform the entry actions of this pane, i.e. clear the message line.
+	 */
+	public void entryActions() {
+		clearMessage();
+	}
+
+	/**
+	 * A class which listens for button clicks.
+	 */
+	class ActionHandler implements ActionListener {
+		/**
+		 * Called when the user clicks the login button. Checks with the
+		 * database if the user exists, and if so notifies the CurrentUser
+		 * object.
+		 * 
+		 * @param e
+		 *            The event object (not used).
+		 */
+		public void actionPerformed(ActionEvent e) {
+			//String userId = fields[PRODUCT_NAME].getText();
+			int action = Integer.parseInt(e.getActionCommand());
+			switch(action){
+			case 0:	
+				String cookieName = fields[PRODUCT_NAME].getText();
+				if(cookieName.equals("")){
+					messageLabel.setText("Error, the product needs a name");
+					break;
+				}
+				else if(ingridients.isEmpty()){
+					messageLabel.setText("Error, the product needs atleast one ingrident");
+					break;
+				}
+				if(db.cookieExists(cookieName))
+				//check fi already exists
+					//ask if update
+				//delete from tablename where condition
+				
+				//else add new
+				db.addCookie(cookieName);
+				db.addReciepeItems(cookieName, ingridients, quantities);
+				System.out.println("save");
+				break;
+			case 1:
+				System.out.println("cancel");
+				mainpanel.removeAll();
+				ingridients.clear();
+				quantities.clear();
+				content();
+				mainpanel.revalidate();
+				mainpanel.repaint();
+				break;
+			default:
+				break;
+			}
+			/* --- insert own code here --- */
+			/*System.out.println(userId); 
+            if(db.login(userId)){
+            	CurrentUser.instance().loginAs(userId);
+            }*/
+		}
+	}
+
+}

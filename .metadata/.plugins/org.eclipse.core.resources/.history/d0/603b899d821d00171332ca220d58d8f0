@@ -1,0 +1,502 @@
+//package dbtLab3;
+
+import java.sql.*;
+//import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Date;
+
+import javax.swing.DefaultListModel;
+
+/**
+ * Database is a class that specifies the interface to the movie
+ * database. Uses JDBC.
+ */
+public class Database {
+
+    /**
+     * The database connection.
+     */
+    private Connection conn;
+
+    /**
+     * Create the database interface object. Connection to the
+     * database is performed later.
+     */
+    public Database() {
+        conn = null;
+    }
+
+    /**
+     * Open a connection to the database, using the specified user
+     * name and password.
+     */
+    public boolean openConnection(String filename) {
+        try {
+            Class.forName("org.sqlite.JDBC");
+            conn = DriverManager.getConnection("jdbc:sqlite:" + filename);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean login(String username){
+    	
+		try {
+			Statement stmt = conn.createStatement();
+			
+			/*PreparedStatement prepare = conn.prepareStatement("select * from users where username ==  ? ");
+			
+			prepare.setString(1, username);
+			*/
+			
+	    	ResultSet rs = stmt.executeQuery("select * from users where username == \"" + username + "\"");
+	    	//stmt.close();
+	    	return rs.next();
+	    //	return rs.first();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+
+    	
+
+    }
+    
+    
+    public DefaultListModel<String> getMovies(){
+    	DefaultListModel<String> nameListModel = new DefaultListModel<String>();
+		try {
+			Statement stmt = conn.createStatement();
+	    	ResultSet rs = stmt.executeQuery("select * from movies");
+	    	//int i=0;
+	    	while(rs.next()){
+	    //		System.out.println(rs.getString("movieName"));
+	    	//	nameListModel.
+	    		nameListModel.addElement(rs.getString("movieName"));
+	    	//	i++;
+	    	}
+	    	System.out.println("SIZE: " + nameListModel.size());
+	    	stmt.close();
+	    	//stmt.close();
+	    	//return rs.next();
+	    //	return rs.first();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    	return nameListModel;
+    }
+    
+    
+    
+    public DefaultListModel<String> getDates(String movie){
+    	DefaultListModel<String> nameListModel = new DefaultListModel<String>();
+    	
+    	DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    	
+		try {
+			Statement stmt = conn.createStatement();
+	    	ResultSet rs = stmt.executeQuery("select movieDate from movies where movieName == \"" + movie +"\"" );
+
+	    	while(rs.next()){
+
+	    		nameListModel.addElement(rs.getString("movieDate"));
+	    	//	System.out.println(today.toString());
+	    	}
+	    	stmt.close();
+	    	System.out.println("SIZE: " + nameListModel.size());
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	
+    	
+    	return nameListModel;
+    }
+    
+    public String getTheater(String movie, String date){
+    	Statement stmt;
+		try {
+			stmt = conn.createStatement();
+	    	ResultSet rs = stmt.executeQuery("select theaterName from movies where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\"");
+	    	stmt.close();
+	    	return rs.getString("theaterName");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+    	return "";
+    }
+    
+    
+    public int getSeats(String movie, String date){
+    	Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			//fetch reservations
+			ResultSet rs = stmt.executeQuery("select count(resNbr) from reservations where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\"");
+					//stmt.executeQuery("select reservations from movies where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\"");
+			int reservation = rs.getInt("count(resNbr)");
+			
+			System.out.println("RES: " + reservation);
+			
+			//fetch total seats
+	    	rs = stmt.executeQuery("select seat from theaters t,movies m where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\" and "
+	    			+ "t.theaterName==m.theaterName");
+	    	
+	    	System.out.println("SEATS: " + rs.getInt("seat"));
+	    	int res = rs.getInt("seat")-reservation;
+	    	stmt.close();
+	    	return res;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
+    }
+    
+    public boolean book(String movie, String date, String username){
+    	Statement stmt;
+		try {
+			conn.setAutoCommit(false);
+			stmt = conn.createStatement();
+			System.out.println("try: " + movie + " , " + date);
+			ResultSet rs = stmt.executeQuery("select count(resNbr) from reservations where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\"");
+			//= stmt.executeQuery("select reservations from movies where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\"");
+			int reservation = rs.getInt("count(resNbr)");
+			rs = stmt.executeQuery("select seat from theaters t,movies m where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\" and "
+	    			+ "t.theaterName==m.theaterName");
+			int seats = rs.getInt("seat");
+			if(reservation>=seats){
+				System.out.println("SOLD OUT! " + seats + " res: " + reservation);
+				stmt.close();
+				conn.rollback();
+				return false;
+			}
+			//rs = stmt.executeQuery("select count(resNbr) from reservations where movieName == \"" + movie +"\" and movieDate ==\"" + date + "\"");
+			
+			//System.out.println("Actual reservation nr: " + rs.getInt("count(resNbr)"));
+			
+			System.out.println(movie + " , " + date);
+	    	stmt.executeUpdate("update movies set reservations = reservations + 1 where movieName == \"" 
+			+ movie +"\" and movieDate ==\"" + date + "\"");
+	    	
+	    	int uniqueID=createHash(movie)+createHash(date)+reservation+1000;
+	    	
+	    	stmt.executeUpdate("insert into reservations(resNbr, movieName, movieDate, userName) values (" 
+	    			+ uniqueID +", \"" + movie + "\",\""+date+"\",\"" + username + "\")");
+	    	System.out.println("return true");
+	    	stmt.close();
+	    	conn.commit();
+	    	return true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+    }
+    
+    public ArrayList<Object[]> getIngridients(){
+    	ArrayList<Object[]> result = new ArrayList<Object[]>();
+    	Statement stmt;
+		try {
+			stmt = conn.createStatement();
+			//fetch reservations
+			ResultSet rs = stmt.executeQuery("select * from ingridient");
+			
+	    	while(rs.next()){
+	    		String ing = rs.getString("ingridientName");
+	    		int amount = rs.getInt("amountInStorage");
+	    		String deliveryDate = rs.getString("deliveryDate");
+	    		
+	    		if(!deliveryDate.equals("")){
+		    		SimpleDateFormat parser = new SimpleDateFormat("yyyyMMdd");
+					Date deldate = parser.parse(deliveryDate);
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+					deliveryDate=df.format(deldate);
+	    		}
+				//System.out.println(df.format(deldate));
+	    		
+	    		
+	    		
+	    		int deliveryAmount = rs.getInt("deliveryAmount");
+	    		result.add(new Object[]{ing,amount,deliveryDate,deliveryAmount});
+	    	//	nameListModel.addElement(rs.getString("movieDate"));
+	    	//	System.out.println(today.toString());
+	    	}
+	    	stmt.close();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+    	return result;
+    }
+    
+    public String[] getCookies(){
+    	Statement stmt;
+    	try{
+    		stmt = conn.createStatement();
+    		ResultSet rs = stmt.executeQuery("Select count(cookieName) from cookie");
+    		int size = rs.getInt("count(CookieName)");
+    		System.out.println(size);
+    		String[] result = new String[size];
+    		rs = stmt.executeQuery("select cookieName from cookie");
+    		int i=0;
+    		while(rs.next()){
+    			result[i]=rs.getString("cookieName");
+    			i++;
+    		}
+    		stmt.close();
+    		rs.close();
+    		return result;
+    		
+    	}catch(SQLException e){
+    		
+    	}
+    	return null;
+    }
+    
+    public boolean addCookie(String cookieName){
+    	Statement stmt;
+    	try{
+    		//conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		stmt.executeUpdate("insert into cookie(cookieName)"+ "values (\"" + cookieName.toLowerCase() + "\")");
+	    	stmt.close();
+    		return true;
+    		
+    	}catch (SQLException e){
+			return false;
+    	}
+    }
+    
+    public boolean cookieExists(String cookieName){
+    	Statement stmt;
+    	try{
+    		stmt = conn.createStatement();
+    		ResultSet rs = stmt.executeQuery("select * from cookie where cookieName== \""+cookieName.toLowerCase()+"\"");
+	    	boolean result = rs.next();
+    		stmt.close();
+	    	rs.close();
+    		return result;
+    		
+    	}catch (SQLException e){
+			e.printStackTrace();
+			return false;
+    	}
+    }
+    
+    
+    public void updateReciepeItems(String cookieName,ArrayList<String> ingridients, ArrayList<Integer> quantities){
+    	Statement stmt;
+    	try{
+    		conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		stmt.executeUpdate("delete from reciepeItem where cookieName == \""+cookieName+"\"");
+    		for(int i=0; i<ingridients.size(); i++){
+    			stmt.executeUpdate("insert into reciepeItem(cookieName,ingridientName,amount) values (\""+cookieName.toLowerCase()+"\",\""+ingridients.get(i).toLowerCase()+"\","+quantities.get(i)+")");
+    		}
+    		conn.commit();
+			conn.setAutoCommit(true);
+    		stmt.close();
+    	}catch (SQLException e){
+    		try {
+				conn.rollback();
+				conn.setAutoCommit(true);
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+    	}
+    }
+    
+    public boolean addReciepeItems(String cookieName,ArrayList<String> ingridients, ArrayList<Integer> quantities){
+    	Statement stmt;
+    	try{
+    		conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		for(int i=0; i<ingridients.size(); i++){
+    			stmt.executeUpdate("insert into reciepeItem(cookieName,ingridientName,amount) values (\""+cookieName.toLowerCase()+"\",\""+ingridients.get(i).toLowerCase()+"\","+quantities.get(i)+")");
+    		}
+    		conn.commit();
+			conn.setAutoCommit(true);
+    		stmt.close();
+    	}catch (SQLException e){
+    		try {
+				conn.rollback();
+				conn.setAutoCommit(true);
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			return false;
+    	}
+    	return true;
+    }
+    
+    public boolean updateIngridient(String ingridient, String deliveryDate){
+    	Statement stmt;
+    	try{
+    		//conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		Date date = new Date();
+    		DateFormat df = new SimpleDateFormat("yyyyMMdd");
+    		System.out.println(df.format(date));
+    		stmt.executeUpdate("update ingridient set deliveryDate = \""+deliveryDate+"\""
+    				+ "where ingridientName == \"" + ingridient.toLowerCase() + "\"");
+	    	stmt.close();
+    		return true;
+    		
+    	}catch (SQLException e){
+			e.printStackTrace();
+			return false;
+    	}
+    }
+    
+    public boolean ingridientExists(String ingridient){
+    	Statement stmt;
+    	try{
+    		//conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		//System.out.println(ingridient);
+
+    		ResultSet rs = stmt.executeQuery("select * from ingridient where ingridientName== \""+ingridient.toLowerCase()+"\"");
+    	//	System.out.println(rs.getString("ingridientName"));
+    	//	System.out.println(rs.next());
+	    	boolean result = rs.next();
+    		stmt.close();
+	    	rs.close();
+    		return result;
+    		
+    	}catch (SQLException e){
+			e.printStackTrace();
+			return false;
+    	}
+    }
+    
+    public boolean updateIngridient(String ingridient, int amount){
+    	Statement stmt;
+    	try{
+    		//conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		Date date = new Date();
+    		DateFormat df = new SimpleDateFormat("yyyyMMdd");
+    		System.out.println(df.format(date));
+    		stmt.executeUpdate("update ingridient set deliveryAmount = \""+amount+"\""
+    				+ "where ingridientName == \"" + ingridient.toLowerCase() + "\"");
+	    	stmt.close();
+    		return true;
+    		
+    	}catch (SQLException e){
+			e.printStackTrace();
+			return false;
+    	}
+    }
+    
+    public boolean addIngridient(String ingridient, int amount, String deliveryDate, int deliveryAmount){
+    	Statement stmt;
+    	try{
+    		//conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		stmt.executeUpdate("insert into ingridient(ingridientName,amountInStorage,deliveryDate,deliveryAmount)"+
+    				"values (\"" + ingridient.toLowerCase() + "\"," + amount + ",\"" + deliveryDate +"\"," + deliveryAmount+")");
+	    	stmt.close();
+    		return true;
+    		
+    	}catch (SQLException e){
+    		//final int ss = e.getErrorCode();
+    		//System.out.println(ss);
+			if(e.getErrorCode() == 19){
+				System.out.println("Error, this ingridient already exists!");
+			}
+			else{
+				//System.out.println(e.getSQLState());
+				e.printStackTrace();
+			// TODO Auto-generated catch block
+			//
+			}
+			return false;
+    	}
+    }
+    
+    public void updateIngridients(){
+    	Statement stmt;
+    	try{
+    		//conn.setAutoCommit(false);
+    		stmt = conn.createStatement();
+    		Date date = new Date();
+    		DateFormat df = new SimpleDateFormat("yyyyMMdd");
+    		System.out.println(df.format(date));
+    		stmt.executeUpdate("update ingridient set amountInStorage = amountInStorage+deliveryAmount,deliveryAmount = 0"
+    				+ ",deliveryDate =\"\" where deliveryDate <= \"" + df.format(date) + "\" and deliveryDate !=\"\"");
+    		//return true;
+	    	stmt.close();
+    	}catch (SQLException e){
+    		//final int ss = e.getErrorCode();
+    		//System.out.println(ss);
+			if(e.getErrorCode() == 19){
+				System.out.println("Error, this ingridient already exists!");
+			}
+			else{
+				//System.out.println(e.getSQLState());
+				e.printStackTrace();
+			// TODO Auto-generated catch block
+			//
+			}
+		//	return false;
+    	}
+    	
+    }
+    
+    
+    private int createHash(String name){
+    	char[] temp = name.toCharArray();
+    	int res=Integer.MIN_VALUE;
+    	for(int i=0; i<temp.length; i++){
+    		res=res+temp[i];
+    	}
+    	return res;
+    }
+
+    /**
+     * Close the connection to the database.
+     */
+    public void closeConnection() {
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Check if the connection to the database has been established
+     * 
+     * @return true if the connection has been established
+     */
+    public boolean isConnected() {
+        return conn != null;
+    }
+
+    /* --- insert own code here --- */
+}

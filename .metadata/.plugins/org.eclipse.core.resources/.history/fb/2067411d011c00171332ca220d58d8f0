@@ -1,0 +1,70 @@
+
+import javax.swing.table.AbstractTableModel;
+
+
+public class MaterialTable extends AbstractTableModel{
+	private String[] columnNames;
+	private Object[][] data;
+	public MaterialTable(){
+		super();
+		columnNames = new String[]{"Ingridient", "Quantity"};
+		data = new Object[][] {
+					{"Butter", new Integer(0)},
+					{"Salt", new Integer(100)},
+					{"Sugar", new Integer(200)},
+					{"Chokolate", new Integer(340)},
+					{"Blueberries", new Integer(260)},
+					};
+	}
+	
+	
+	@Override
+	public String getColumnName(int col) {
+        return columnNames[col];
+    }
+	
+	@Override
+	public int getColumnCount() {
+		// TODO Auto-generated method stub
+		return columnNames.length;
+	}
+
+	@Override
+	public int getRowCount() {
+		// TODO Auto-generated method stub
+		return data.length;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		// TODO Auto-generated method stub
+		return data[row][col];
+	}
+	
+	@Override
+	public Class<?> getColumnClass(int col){
+		if(col==columnNames.length-1){
+			return Integer.class;
+		}
+		return super.getColumnClass(col);
+	}
+	
+	
+	@Override
+	public boolean isCellEditable(int row, int col){
+		return col==columnNames.length-1;
+	}
+	
+	@Override
+	public void setValueAt(Object value, int row, int col){
+		if(col==columnNames.length-1){
+			data[row][col] = value;
+			System.out.println("UPDATE " + data[row][0] + ", " + data[row][1] + ", " + value);
+			//query stuff
+			fireTableCellUpdated(row,col);
+		}
+	}
+	
+
+
+}

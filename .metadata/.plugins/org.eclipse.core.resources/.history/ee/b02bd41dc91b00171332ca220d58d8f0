@@ -1,0 +1,26 @@
+import javax.swing.table.AbstractTableModel;
+
+
+public class PalletTable extends AbstractTableModel{
+	private String[] columnNames;
+	private Object[][] data;
+	
+	@Override
+	public int getColumnCount() {
+		// TODO Auto-generated method stub
+		return columnNames.length;
+	}
+
+	@Override
+	public int getRowCount() {
+		// TODO Auto-generated method stub
+		return data.length;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		// TODO Auto-generated method stub
+		return data[row][col];
+	}
+
+}

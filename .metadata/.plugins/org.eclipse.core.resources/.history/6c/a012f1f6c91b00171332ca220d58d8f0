@@ -1,0 +1,43 @@
+import javax.swing.table.AbstractTableModel;
+
+
+public class PalletTable extends AbstractTableModel{
+	private String[] columnNames;
+	private Object[][] data;
+	
+	@Override
+	public int getColumnCount() {
+		// TODO Auto-generated method stub
+		return columnNames.length;
+	}
+
+	@Override
+	public int getRowCount() {
+		// TODO Auto-generated method stub
+		return data.length;
+	}
+
+	@Override
+	public Object getValueAt(int row, int col) {
+		// TODO Auto-generated method stub
+		return data[row][col];
+	}
+	
+	public Class<?> getColumnClass(int col){
+		if(col==columnNames.length-1){
+			return Boolean.class;
+		}
+		return super.getColumnClass(col);
+	}
+	
+	
+	
+	public boolean isCellEditable(int row, int col){
+		return col==columnNames.length-1;
+	}
+	
+	public void setValueAt(Object value, int row, int col){
+		
+	}
+
+}

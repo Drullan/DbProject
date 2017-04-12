@@ -1,0 +1,236 @@
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+
+
+public class PalletOverviewPane extends BasicPane {
+
+	private static final long serialVersionUID = 1;
+
+	/**
+	 * The text field where the user id is entered.
+	 */
+	private JPanel mainpanel;
+	private JTable table;
+	private PalletTable myTable;
+	private JTextField[] fields;
+	private JComboBox<String> blockedList;
+	/**
+	 * The number of the field where the user id is entered.
+	 */
+	private static final int DATETO = 3;
+	private static final int DATEFROM = 2;
+	private static final int CUSTOMER = 4;
+	private static final int PALLETID = 0;
+	private static final int COOKIENAME = 1;
+//	private int ingridientCount=0;
+
+	/**
+	 * The total number of fields in the fields array.
+	 */
+	private static final int NBR_FIELDS = 5;
+
+	/**
+	 * Create the login pane.
+	 * 
+	 * @param db
+	 *            The database object.
+	 */
+	public PalletOverviewPane(Database db) {
+		super(db);
+
+	}
+
+	/**
+	 * Create the top panel, consisting of the text field.
+	 * 
+	 * @return The top panel.
+	 */
+	public JComponent createTopPanel() {
+		//mainpanel = new JPanel();
+	//	content();
+		fields = new JTextField[NBR_FIELDS];
+		myTable = new PalletTable(db);
+		table = new JTable(myTable);
+		table.setPreferredScrollableViewportSize(new Dimension(700, 170));
+        table.setFillsViewportHeight(true);
+		JScrollPane scroll = new JScrollPane(table);
+		//scroll.setPreferredSize(new Dimension(300,250));
+		return scroll;
+	}
+
+	
+	private void content(){
+		mainpanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.weightx=0.2;
+		c.gridx=1;
+		c.gridy=1;
+		
+		blockedList = new JComboBox<String>(new String[]{"all","blocked","unblocked"});
+		mainpanel.add(blockedList,c);
+		c.gridx=0;
+		c.gridy=1;
+
+		JButton createButton = new JButton("Order new pallet");
+		createButton.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				try{
+					//db.clearOrders();
+					int quantity = Integer.parseInt(fields[QUANTITY].getText());
+					String customer = fields[CUSTOMERNAME].getText();
+					String destination = fields[DESTINATION].getText();
+					String cookieName = (String)productList.getSelectedItem();
+					SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+					Date deldate = parser.parse(fields[DELIVERYDATE].getText());
+					SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+					if(customer.equals("")){
+						messageLabel.setText("Error, customer name needs a value");
+						return;
+					}
+					if(destination.equals("")){
+						messageLabel.setText("Error, destination needs a value");
+						return;
+					}
+				//	Date prodate = parser.parse(fields[PRODUCTIONDATE].getText());
+					//querry update new pallet with productlistname and quantity: quantity at date Date.
+					mainpanel.revalidate();
+					mainpanel.repaint();
+					System.out.println("ADD!");
+					messageLabel.setText("succesfully added " + quantity + " pallets of " + cookieName + " to be delivered at " + 
+							fields[DELIVERYDATE].getText() + "to location " + destination);
+					String res = db.tryCreateCustomer(customer, destination);
+					if(res!=null){
+						if(!confirmUpdateDialog(res,customer,destination)){
+							return;
+						}
+					}
+					//update rest
+					db.placeOrder(customer, df.format(deldate),cookieName,quantity);
+					db.updateOrders(cookieName);
+					fields[QUANTITY].setText("");
+					fields[DELIVERYDATE].setText("");
+					fields[CUSTOMERNAME].setText("");
+					fields[DESTINATION].setText("");
+				}catch(NumberFormatException ex){
+					System.out.println("ERROR");
+					messageLabel.setText("Error, quantity must be an int");
+				} catch (ParseException e1) {
+					// TODO Auto-generated catch block
+					//e1.printStackTrace();
+					messageLabel.setText("Error, wrong format of date, please use yyyy-MM-dd");
+				}
+			}
+		});
+		mainpanel.add(createButton,c);
+		c.gridx=2;
+		c.gridy=0;
+		mainpanel.add(new JLabel("Quantity"),c);
+		c.gridx=3;
+		mainpanel.add(new JLabel("Destination"),c);
+		c.gridy=2;
+		c.gridx=2;
+		mainpanel.add(new JLabel("Delivery date"),c);
+		c.gridx=3;
+		mainpanel.add(new JLabel("Customer name"),c);
+		c.gridy=1;
+		c.gridx=3;
+		mainpanel.add(fields[DESTINATION],c);
+		c.gridx=2;
+		mainpanel.add(fields[QUANTITY],c);
+		c.gridy=3;
+		mainpanel.add(fields[DELIVERYDATE],c);
+		c.gridx=3;
+		mainpanel.add(fields[CUSTOMERNAME],c);
+	}
+	
+	
+
+	/**
+	 * Create the bottom panel, consisting of the login button and the message
+	 * line.
+	 * 
+	 * @return The bottom panel.
+	 */
+	public JComponent createBottomPanel() {
+		JButton[] buttons = new JButton[0];
+	/*	buttons[0] = new JButton("Save");
+		buttons[0].setActionCommand("0");
+		buttons[1] = new JButton("Cancel");
+		buttons[1].setActionCommand("1");*/
+		ActionHandler actHand = new ActionHandler();
+	//	fields[PRODUCT_NAME].addActionListener(actHand);
+		return new ButtonAndMessagePanel(buttons, messageLabel, actHand);
+	}
+
+	/**
+	 * Perform the entry actions of this pane, i.e. clear the message line.
+	 */
+	public void entryActions() {
+		clearMessage();
+		myTable.update();
+	}
+
+	/**
+	 * A class which listens for button clicks.
+	 */
+	class ActionHandler implements ActionListener {
+		/**
+		 * Called when the user clicks the login button. Checks with the
+		 * database if the user exists, and if so notifies the CurrentUser
+		 * object.
+		 * 
+		 * @param e
+		 *            The event object (not used).
+		 */
+		public void actionPerformed(ActionEvent e) {
+			//String userId = fields[PRODUCT_NAME].getText();
+			int action = Integer.parseInt(e.getActionCommand());
+			switch(action){
+			case 0:	
+	/*			if(fields[PRODUCT_NAME].getText().equals("")){
+					messageLabel.setText("Error, the product needs a name");
+					break;
+				}
+				else if(ingridients.isEmpty()){
+					messageLabel.setText("Error, the product needs atleast one ingrident");
+					break;
+				}*/
+				System.out.println("save");
+				break;
+			case 1:
+				System.out.println("cancel");
+				mainpanel.removeAll();
+		//		ingridients.clear();
+		//		quantities.clear();
+		//		content();
+				mainpanel.revalidate();
+				mainpanel.repaint();
+				break;
+			default:
+				break;
+			}
+			/* --- insert own code here --- */
+			/*System.out.println(userId); 
+            if(db.login(userId)){
+            	CurrentUser.instance().loginAs(userId);
+            }*/
+		}
+	}
+
+}
