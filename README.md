@@ -4,6 +4,8 @@ Erik Andersson Data 2013 erik.andersson.811@student.lu.se
   Shan Langlais Data 2013
 ## Introduction
 We've been assigned to implement a database for the supervision of production and delivery of cookies produced by the company Krusty Kookies Sweden AB.
+## Requirements
+
 ## Getting started
 Add the file sqlite-jdbc.jar to the build path and run.
 The database is connected with a relative path so it should work 
