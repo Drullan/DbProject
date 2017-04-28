@@ -31,7 +31,6 @@ It should be possible to:
 - [x] Orders must be registered in the database. 
 - [x] Be able to see all orders that are to be delivered during a specific time period.
 
-The production planning is manual. At the end of each week, production for the following week is planned, using the orders for the following weeks as input. We cannot produce "on demand", since it takes time to set up a production line for a new kind of cookie (mixers have to be cleaned, for example).
 # Getting started
 Add the file sqlite-jdbc.jar to the build path and run.
 The database is connected with a relative path so it should work 
