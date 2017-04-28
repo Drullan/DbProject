@@ -7,7 +7,32 @@ We've been assigned to implement a database for the supervision of production an
 ## Requirements
 - [x] The pallet number, product name, and date and time of production is registered in the database. The pallet number is unique.
 - [x] At any time, it should be possible to check how many pallets of a product that have been produced during a specific time.
-## Getting started
+- [x] When a pallet is produced, the raw materials storage must be updated. 
+- [x] It should be possible to check the amount in store of each ingredient
+- [ ] It should be possible to see when, and how much of, an ingredient was last delivered into storage.
+- [ ] An interface to the collection of recipes where one can study existing recipes
+- [x] An interface where one can update existing recipes.
+- [x] An inteface for entering new recipes
+- [x] It shouldn't be possible to block already delivered palletes
+It should be possible to: 
+- [x] Trace each pallet. 
+- [x] To see all information about a pallet with a given number 
+- [x] The contents of the pallet
+- [x] The location of the pallet
+- [x] If the pallet is delivered 
+- [x] To whom it has been delievered
+- [x] To see which pallets that contain a certain product
+- [x] To see which pallets that have been produced during a certain time interval
+- [x] To see which products that are blocked
+- [x] To see which pallets that contain a certain blocked product
+- [x] Be able to check which pallets that have been delivered to a given customer
+- [x] Be able to check the date and time of delivery.
+
+- [x] Orders must be registered in the database. 
+- [x] Be able to see all orders that are to be delivered during a specific time period.
+
+The production planning is manual. At the end of each week, production for the following week is planned, using the orders for the following weeks as input. We cannot produce "on demand", since it takes time to set up a production line for a new kind of cookie (mixers have to be cleaned, for example).
+# Getting started
 Add the file sqlite-jdbc.jar to the build path and run.
 The database is connected with a relative path so it should work 
 right away, however if you don't get connected you can set your direct
