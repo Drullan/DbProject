@@ -5,7 +5,8 @@ Erik Andersson Data 2013 erik.andersson.811@student.lu.se
 ## Introduction
 We've been assigned to implement a database for the supervision of production and delivery of cookies produced by the company Krusty Kookies Sweden AB.
 ## Requirements
-
+- [x] The pallet number, product name, and date and time of production is registered in the database. The pallet number is unique.
+- [x] At any time, it should be possible to check how many pallets of a product that have been produced during a specific time.
 ## Getting started
 Add the file sqlite-jdbc.jar to the build path and run.
 The database is connected with a relative path so it should work 
