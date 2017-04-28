@@ -13,7 +13,7 @@ We've been assigned to implement a database for the supervision of production an
 - [ ] An interface to the collection of recipes where one can study existing recipes
 - [x] An interface where one can update existing recipes.
 - [x] An inteface for entering new recipes
-- [x] It shouldn't be possible to block already delivered palletes
+- [x] It shouldn't be possible to block already delivered palletes  
 It should be possible to: 
 - [x] Trace each pallet. 
 - [x] To see all information about a pallet with a given number 
