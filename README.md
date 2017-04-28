@@ -5,17 +5,19 @@ Erik Andersson Data 2013 erik.andersson.811@student.lu.se
 ## Introduction
 We've been assigned to implement a database for the supervision of production and delivery of cookies produced by the company Krusty Kookies Sweden AB.
 ## Requirements
-- [x] The pallet number, product name, and date and time of production is registered in the database. The pallet number is unique.
-- [x] At any time, it should be possible to check how many pallets of a product that have been produced during a specific time.
-- [x] When a pallet is produced, the raw materials storage must be updated. 
+- [x] The pallet number, product name, and date and time of production is registered in the database. The pallet number is unique
+- [x] At any time, it should be possible to check how many pallets of a product that have been produced during a specific time
+- [x] When a pallet is produced, the raw materials storage must be updated
 - [x] It should be possible to check the amount in store of each ingredient
-- [ ] It should be possible to see when, and how much of, an ingredient was last delivered into storage.
+- [ ] It should be possible to see when, and how much of, an ingredient was last delivered into storage
 - [ ] An interface to the collection of recipes where one can study existing recipes
-- [x] An interface where one can update existing recipes.
+- [x] An interface where one can update existing recipes
 - [x] An inteface for entering new recipes
 - [x] It shouldn't be possible to block already delivered palletes  
 ### It should be possible to: 
-- [x] Trace each pallet. 
+- [x] Create new pallets
+- [x] Trace each pallet 
+- [x] Block pallets with a given product, produced within a given time span
 - [x] To see all information about a pallet with a given number 
 - [x] The contents of the pallet
 - [x] The location of the pallet
