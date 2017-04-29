@@ -35,7 +35,7 @@ We've been assigned to implement a database for the supervision of production an
 # System overview
 Our system contains of one program which is modeled in the image below. The classes shown in the uml shows the main flow of the system. There are lots of smaller gui classes which we haven't created but used from previous labs in this course. The panes are mainly made by us but contains some stubs from previous labs in this course. We overloaded custom tables to display ingridients and pallets.  
 The factory gui contains one database class and the different panes. It sends the database to every pane so that they can communicate directly with the database class via methods. The database class does all the querying to the actual database which is named db.db.
-![Alt text](/relative/path/to/dbproject.png?raw=true "System Overview")
+![Alt text](dbproject.png?raw=true "System Overview")
 # Getting started
 Add the file sqlite-jdbc.jar to the build path and run.
 The database is connected with a relative path so it should work 
