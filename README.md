@@ -1,7 +1,7 @@
 # Database project LTH 2017-04-12
 ## Collaborators
 Erik Andersson Data 2013 erik.andersson.811@student.lu.se  
-  Shan Langlais Data 2013
+  Shan Langlais Data 2013 shan.langlais.238@student.lu.se
 ## Introduction
 We've been assigned to implement a database for the supervision of production and delivery of cookies produced by the company Krusty Kookies Sweden AB.
 ## Requirements
