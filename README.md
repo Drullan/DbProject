@@ -34,8 +34,71 @@ We've been assigned to implement a database for the supervision of production an
 - [x] Be able to see all orders that are to be delivered during a specific time period.
 # System overview
 Our system contains of one program which is modeled in the image below. The classes shown in the uml shows the main flow of the system. There are lots of smaller gui classes which we haven't created but used from previous labs in this course. The panes are mainly made by us but contains some stubs from previous labs in this course. We overloaded custom tables to display ingridients and pallets. These tables also directly communicates with the database class via method calls.    
-The factory gui contains one database class and the different panes. It sends the database to every pane so that they can communicate directly with the database class via methods. The database class does all the querying to the actual database which is named db.db.
+The factory gui contains one database class and the different panes. It sends the database to every pane so that they can communicate directly with the database class via methods. The database class does all the querying to the actual database which is named db.db.  
+The database is an sqlite database and we communicate to it with jdbc.
 ![System overview image](dbproject.png?raw=true "System Overview")
+# SQL statements for building the db
+```sql
+CREATE TABLE ingridient(
+	ingridientName varchar2(128) PRIMARY KEY,
+	amountInStorage int,
+	deliveryDate date,
+	deliveryAmount int
+);
+
+CREATE TABLE cookie(
+	cookieName varchar2(128) PRIMARY KEY
+);
+
+CREATE TABLE reciepeItem(
+	cookieName varchar2(128),
+	amount int,
+	ingridientName varchar2(128),
+	FOREIGN KEY (cookieName) REFERENCES cookie(cookieName),
+	FOREIGN KEY (ingridientName) REFERENCES ingridient(ingridientName),
+	PRIMARY KEY (cookieName,ingridientName)
+);
+
+CREATE TABLE pallet(
+	palletId integer PRIMARY KEY AUTOINCREMENT,
+	dateProduced date,
+	isBlocked int,
+	dateDelivered date,
+	cookieName varchar2(128),
+	location varchar2(64),
+	FOREIGN KEY (cookieName) REFERENCES cookie(cookieName)
+);
+
+CREATE TABLE palletItem(
+	palletId int,
+	orderNbr,
+	FOREIGN KEY (orderNbr) REFERENCES myOrder(orderNbr),
+	FOREIGN KEY (palletId) REFERENCES pallet(palletId),
+	PRIMARY KEY (palletId,orderNbr)
+);
+
+CREATE TABLE customer(
+	customerName varchar2(128) PRIMARY KEY,
+	address varchar2(128)
+);
+
+CREATE TABLE myOrder(
+	orderNbr integer PRIMARY KEY AUTOINCREMENT,
+	placedDate date,
+	deliveryDate date,
+	customerName varchar2(128),
+	FOREIGN KEY (customerName) REFERENCES customer(customerName)
+);
+
+CREATE TABLE orderItem(
+	orderNbr int,
+	cookieName varchar2(128),
+	nbrPallets int,
+	FOREIGN KEY (orderNbr) REFERENCES myOrder(orderNbr),
+	FOREIGN KEY (cookieName) REFERENCES cookie(cookieName),
+	PRIMARY KEY (cookieName,orderNbr)
+);
+```
 # Getting started
 Add the file sqlite-jdbc.jar to the build path and run.
 The database is connected with a relative path so it should work 
