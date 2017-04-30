@@ -153,18 +153,18 @@ ingridient(**ingridientName**, amountInStorage, deliveryDate, deliveryAmount)
 
 cookie(**cookieName**)
 
-recipeItem(__**cookieName, ingridientName,**__ amount)
+recipeItem(_**cookieName, ingridientName,**_ amount)
 
-pallet(**palletId,** __**cookieName,**__ dateProduced, isBlocked, dateDelivered, location)
+pallet(**palletId,** _**cookieName,**_ dateProduced, isBlocked, dateDelivered, location)
 
-palletItem(__**palletId, orderNbr**__)
+palletItem(_**palletId, orderNbr**_)
 
 customer(**customerName,** address)
 
-myOrder(**orderNbr,** __customerName,__ placedDate, deliveryDate)
+myOrder(**orderNbr,** _customerName,_ placedDate, deliveryDate)
 
-orderItem(**__orderNbr, cookieName,__** nbrPallets)
+orderItem(**_orderNbr, cookieName,_** nbrPallets)
 
-Primary keys are **bold** and foreign keys are __italic__.
+Primary keys are **bold** and foreign keys are _italic_.
 
 The relationships are obviously in BCNF.
