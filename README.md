@@ -150,11 +150,19 @@ are bored.
 
 ## Relations
 ingridient(ingridientName, amountInStorage, deliveryDate, deliveryAmount)
+
 cookie(cookieName)
+
 recipeItem(cookieName, ingridientName, amount)
+
 pallet(palletId, cookieName, dateProduced, isBlocked, dateDelivered, location)
+
 palletItem(palletId, orderNbr)
+
 customer(customerName, address)
+
 myOrder(orderNbr, customerName, placedDate, deliveryDate)
+
 orderItem(orderNbr, cookieName, nbrPallets)
+
 The relationships are obviously in BCNF.
