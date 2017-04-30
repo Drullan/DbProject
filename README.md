@@ -145,3 +145,16 @@ that's the file that contains all relevant code for this course. The gui
 classes are quite messy and uggly but feel free to check them out if you
 are bored.
 ## Database overview
+
+![Database overview image](db.png?raw=true "Database Overview")
+
+## Relations
+ingridient(ingridientName, amountInStorage, deliveryDate, deliveryAmount)
+cookie(cookieName)
+recipeItem(cookieName, ingridientName, amount)
+pallet(palletId, cookieName, dateProduced, isBlocked, dateDelivered, location)
+palletItem(palletId, orderNbr)
+customer(customerName, address)
+myOrder(orderNbr, customerName, placedDate, deliveryDate)
+orderItem(orderNbr, cookieName, nbrPallets)
+The relationships are obviously in BCNF.
