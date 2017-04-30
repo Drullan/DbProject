@@ -8,7 +8,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
-import javax.swing.DefaultListModel;
 
 /**
  * Database is a class that specifies the interface to the movie
@@ -139,9 +138,9 @@ public class Database {
 					break;
 			}
 			if(customers.equals("")){
-				cookies = cookies.replace("p.", "");
-				pallets = pallets.replace("p.", "");
-				rs = stmt.executeQuery("select * from pallet where (location == \"in freezer\" or location == \"stalled\")"+ pallets+cookies+producedf+producedt+blocker);
+			//	cookies = cookies.replace("p.", "");
+			//	pallets = pallets.replace("p.", "");
+				rs = stmt.executeQuery("select * from pallet p where (location == \"in freezer\" or location == \"stalled\")"+ pallets+cookies+producedf+producedt+blocker);
 		    	while(rs.next()){
 		    		int id = rs.getInt("palletId");
 		    		String cookieName = rs.getString("cookieName");
@@ -186,7 +185,6 @@ public class Database {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("HELLO!?");
     	return new ArrayList<Object[]>(result.values());
     }
     
@@ -290,18 +288,13 @@ public class Database {
     		while(rs.next()){
     			String ingridient = rs.getString("ingridientName");
     			int amount = rs.getInt("amount");
-    			System.out.println("ingridient: " + ingridient);
-    			System.out.println("amount: " + amount);
     			int amountInStorage = rs.getInt("amountInStorage");
-    			System.out.println("amount in Storage: " + amountInStorage);
-    			System.out.println("needed amount: " + amount*15*10*36*nbrOfPallets);
     			if(amount*15*10*36*nbrOfPallets>amountInStorage){
     	    		stmt.close();
     	    		stmt2.close();
     	    		rs.close();
     	    		conn.rollback();
     	    		conn.setAutoCommit(true);
-        			System.out.println("return error!");
     				return "Error, you tried to make " + nbrOfPallets + " pallets of " + cookieName + " which requires " +
         			amount*15*10*36*nbrOfPallets + " of " + ingridient + " but there's only " + amountInStorage + " in storage";
     			}
@@ -355,8 +348,6 @@ public class Database {
     		while(rs.next()){
     			int id = rs.getInt("orderNbr");
     			int nbrOfPallets = rs.getInt("nbrPallets");
-    			System.out.println("ID: " + id);
-    			System.out.println("nbr of pallets: " + nbrOfPallets);
 				ResultSet rs2 = stmt2.executeQuery("Select palletId from pallet where cookieName == \"" + cookieName + "\" and location == \"in freezer\" "
 						+ "and isBlocked==0 order by dateProduced asc");
 				ResultSet rs3 = stmt3.executeQuery("Select deliveryDate from myOrder where orderNbr == " + id);
@@ -365,8 +356,6 @@ public class Database {
 					if(nbrOfPallets<=0){
 						break;
 					}
-					System.out.println("update values!");
-					System.out.println("pallet id: !" + palletId);
 					stmt4.executeUpdate("update orderItem set nbrPallets = nbrPallets-1 where orderNbr == " + id + " and cookieName == \"" + cookieName + "\"");
 					nbrOfPallets--;
 					Date date = new Date();
@@ -400,7 +389,6 @@ public class Database {
     		stmt = conn.createStatement();
     		ResultSet rs = stmt.executeQuery("Select count(cookieName) from cookie");
     		int size = rs.getInt("count(CookieName)");
-    		System.out.println(size);
     		String[] result = new String[size];
     		rs = stmt.executeQuery("select cookieName from cookie");
     		int i=0;
@@ -481,7 +469,6 @@ public class Database {
     	try{
     		stmt = conn.createStatement();
     		for(int i=0; i<ingridients.size(); i++){
-    			System.out.println("add ingridient " + ingridients.get(i));
     			stmt.executeUpdate("insert into reciepeItem(cookieName,ingridientName,amount) values (\""+cookieName.toLowerCase()+"\",\""+ingridients.get(i).toLowerCase()+"\","+quantities.get(i)+")");
     		}
     		stmt.close();
@@ -498,8 +485,6 @@ public class Database {
     		stmt = conn.createStatement();
     		String from = dateFrom.equals("") ? "":" and dateProduced >= " + dateFrom;
     		String to = dateTo.equals("") ? "":" and dateProduced <= " + dateTo;
-    		System.out.println("update pallet set isBlocked = 1, location = \"stalled\" where location!=\"delivered\" and"
-    				+ " cookieName ==\"" + cookieName + "\"" + from + to);
     		stmt.executeUpdate("update pallet set isBlocked = 1, location = \"stalled\" where location!=\"delivered\" and"
     				+ " cookieName ==\"" + cookieName + "\"" + from + to);
     		stmt.close();
@@ -525,8 +510,7 @@ public class Database {
 				location ="\"in freezer\"";
 			}
     		String v = blocked ? "1, location = \"stalled\"":"0, location =" + location;
-    		System.out.println("update pallet set isBlocked = " + v + " where palletId == " + id);
-    		stmt.executeUpdate("update pallet set isBlocked = " + v + " where palletId == " + id);
+    		stmt.executeUpdate("update pallet set isBlocked = " + v + " where palletId == " + id + " and location!=\"delivered\"");
     		stmt.close();
     	}catch (SQLException e){
 			e.printStackTrace();
@@ -544,7 +528,6 @@ public class Database {
     		stmt = conn.createStatement();
     		Date date = new Date();
     		DateFormat df = new SimpleDateFormat("yyyyMMdd");
-    		System.out.println(df.format(date));
     		stmt.executeUpdate("update ingridient set deliveryDate = \""+deliveryDate+"\""
     				+ "where ingridientName == \"" + ingridient.toLowerCase() + "\"");
 	    	stmt.close();
@@ -581,7 +564,6 @@ public class Database {
     		stmt = conn.createStatement();
     		Date date = new Date();
     		DateFormat df = new SimpleDateFormat("yyyyMMdd");
-    		System.out.println(df.format(date));
     		stmt.executeUpdate("update ingridient set deliveryAmount = \""+amount+"\""
     				+ "where ingridientName == \"" + ingridient.toLowerCase() + "\"");
 	    	stmt.close();
@@ -622,13 +604,11 @@ public class Database {
     		stmt = conn.createStatement();
     		Date date = new Date();
     		DateFormat df = new SimpleDateFormat("yyyyMMdd");
-    		System.out.println(df.format(date));
     		stmt.executeUpdate("update ingridient set amountInStorage = amountInStorage+deliveryAmount,deliveryAmount = 0"
     				+ ",deliveryDate =\"\" where deliveryDate <= \"" + df.format(date) + "\" and deliveryDate !=\"\"");
 	    	stmt.close();
     	}catch (SQLException e){
 			if(e.getErrorCode() == 19){
-				System.out.println("Error, this ingridient already exists!");
 			}
 			else{
 				e.printStackTrace();

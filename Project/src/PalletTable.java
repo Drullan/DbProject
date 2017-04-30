@@ -8,10 +8,15 @@ public class PalletTable extends AbstractTableModel{
 	private String[] columnNames;
 	private ArrayList<Object[]> data;
 	private Database db;
+	private String palletId;
+	private String cookieN;
+	private String producedFrom;
+	private String producedTo;
+	private String customer;
+	private int blocked;
 	public PalletTable(Database db){
 		super();
 		this.db=db;
-		//id,cookieName,location, placedDate,deliveryDate,dateProduced,dateDelivered,destination,orderNbr,isBlocked
 		columnNames = new String[]{"Pallet id",
 	            "Product Name",
 	            "Location",
@@ -23,25 +28,26 @@ public class PalletTable extends AbstractTableModel{
 	            "Order Nbr",
 	            "Blocked"};
 		data = db.getPallets();
-/*		data = new Object[][] {
-				{new Integer(0), "Butternut Cookie",
-					"Freezer", "2017-04-06", "2017-04-08","2017-04-07","Hong Kong", new Boolean(false)},
-				{new Integer(1), "Choclate Cookie",
-					"Freezer", "2017-04-06", "2017-04-08","2017-04-07","New York", new Boolean(true)},
-				{new Integer(2), "Blueberry Cookie",
-					"Freezer", "2017-04-06", "2017-04-08","2017-04-07","Kathmandu", new Boolean(true)},
-				{new Integer(3), "Muffin",
-					"Deliverd", "2017-04-06", "2017-04-08","2017-04-07","Beijing", new Boolean(false)},
-				{new Integer(4), "Cheese cake",
-					"Deliverd", "2017-04-06", "2017-04-08","2017-04-07","Tokyo", new Boolean(false)},
-					};*/
+		palletId="";
+		cookieN="";
+		producedFrom="";
+		producedTo="";
+		customer="";
+		blocked=0;
 	}
 	
 	public void update(){
-		data=db.getPallets();
+		filter(palletId,cookieN,producedFrom,producedTo,customer,blocked);
+	//	data=db.getPallets();
 	}
 	
 	public void filter(String palletId,String cookieN,String producedFrom, String producedTo,String customer, int blocked){
+		this.palletId=palletId;
+		this.cookieN=cookieN;
+		this.producedFrom=producedFrom;
+		this.producedTo=producedTo;
+		this.customer=customer;
+		this.blocked=blocked;
 		data=db.getfilterdPallets(palletId, cookieN, producedFrom, producedTo, customer, blocked);
 	}
 	
@@ -87,9 +93,9 @@ public class PalletTable extends AbstractTableModel{
 		if(col==columnNames.length-1){
 			if((boolean)data.get(row)[col]!=(boolean)value){
 				db.updatePallet((int)data.get(row)[0], (boolean)value);
-				data.get(row)[col] = value;
+				update();
 				fireTableCellUpdated(row,col);
-				//update();
+				fireTableCellUpdated(row,2);
 			}
 		}
 	}
