@@ -149,20 +149,22 @@ are bored.
 ![Database overview image](db.png?raw=true "Database Overview")
 
 ## Relations
-ingridient(ingridientName, amountInStorage, deliveryDate, deliveryAmount)
+ingridient(**ingridientName**, amountInStorage, deliveryDate, deliveryAmount)
 
-cookie(cookieName)
+cookie(**cookieName**)
 
-recipeItem(cookieName, ingridientName, amount)
+recipeItem(__**cookieName, ingridientName,**__ amount)
 
-pallet(palletId, cookieName, dateProduced, isBlocked, dateDelivered, location)
+pallet(**palletId,** __**cookieName,**__ dateProduced, isBlocked, dateDelivered, location)
 
-palletItem(palletId, orderNbr)
+palletItem(__**palletId, orderNbr**__)
 
-customer(customerName, address)
+customer(**customerName,** address)
 
-myOrder(orderNbr, customerName, placedDate, deliveryDate)
+myOrder(**orderNbr,** __customerName,__ placedDate, deliveryDate)
 
-orderItem(orderNbr, cookieName, nbrPallets)
+orderItem(**__orderNbr, cookieName,__** nbrPallets)
+
+Primary keys are **bold** and foreign keys are __italic__.
 
 The relationships are obviously in BCNF.
